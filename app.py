@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 import requests
+import sqlite3
 from dotenv import dotenv_values
 
 config = dotenv_values(".env")
@@ -7,6 +8,42 @@ config = dotenv_values(".env")
 app = Flask(__name__)
 
 TMDB_TOKEN = config.get("TMDB_TOKEN")
+# ==============================
+# DATABASE
+# ==============================
+
+def get_db():
+    conn = sqlite3.connect("cineverse.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS watchlist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            movie_id INTEGER UNIQUE,
+            title TEXT,
+            poster_path TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS completed (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            movie_id INTEGER UNIQUE,
+            title TEXT,
+            poster_path TEXT
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+init_db()
 
 
 # ==============================
@@ -144,5 +181,171 @@ def search():
         results=results,
         query=query
     )
+    # ==============================
+# WATCHLIST
+# ==============================
+
+@app.route("/watchlist")
+def watchlist():
+
+    conn = get_db()
+
+    movies = conn.execute(
+        "SELECT * FROM watchlist"
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "watchlist.html",
+        movies=movies
+    )
+
+
+# ==============================
+# ADD TO WATCHLIST
+# ==============================
+
+@app.route("/add-to-watchlist/<int:movie_id>")
+def add_to_watchlist(movie_id):
+
+    headers = {
+        "Authorization": f"Bearer {TMDB_TOKEN}",
+        "accept": "application/json"
+    }
+
+    url = f"https://api.themoviedb.org/3/tv/{movie_id}"
+
+    response = requests.get(
+        url,
+        headers=headers,
+        params={"language": "en-US"},
+        timeout=10
+    )
+
+    movie = response.json()
+
+    conn = get_db()
+
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO watchlist
+        (movie_id, title, poster_path)
+        VALUES (?, ?, ?)
+        """,
+        (
+            movie_id,
+            movie.get("name"),
+            movie.get("poster_path")
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("movie", movie_id=movie_id))
+
+
+# ==============================
+# REMOVE FROM WATCHLIST
+# ==============================
+
+@app.route("/remove-from-watchlist/<int:movie_id>")
+def remove_from_watchlist(movie_id):
+
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM watchlist WHERE movie_id = ?",
+        (movie_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("watchlist"))
+# ==============================
+# COMPLETED PAGE
+# ==============================
+
+@app.route("/completed")
+def completed():
+
+    conn = get_db()
+
+    movies = conn.execute(
+        "SELECT * FROM completed"
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "completed.html",
+        movies=movies
+    )
+
+
+# ==============================
+# ADD TO COMPLETED
+# ==============================
+
+@app.route("/add-to-completed/<int:movie_id>")
+def add_to_completed(movie_id):
+
+    headers = {
+        "Authorization": f"Bearer {TMDB_TOKEN}",
+        "accept": "application/json"
+    }
+
+    url = f"https://api.themoviedb.org/3/tv/{movie_id}"
+
+    response = requests.get(
+        url,
+        headers=headers,
+        params={"language": "en-US"},
+        timeout=10
+    )
+
+    movie = response.json()
+
+    conn = get_db()
+
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO completed
+        (movie_id, title, poster_path)
+        VALUES (?, ?, ?)
+        """,
+        (
+            movie_id,
+            movie.get("name"),
+            movie.get("poster_path")
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("completed"))
+
+
+# ==============================
+# REMOVE FROM COMPLETED
+# ==============================
+
+@app.route("/remove-from-completed/<int:movie_id>")
+def remove_from_completed(movie_id):
+
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM completed WHERE movie_id = ?",
+        (movie_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("completed"))
 if __name__ == "__main__":
     app.run(debug=True)

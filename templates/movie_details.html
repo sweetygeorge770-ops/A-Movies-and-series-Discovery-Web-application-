@@ -149,10 +149,18 @@
         }
 
         .watchlist {
-            background: white;
-            color: black;
-        }
+    background: white;
+    color: black;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    display: inline-block;
+    font-size: 14px;
+}
 
+.watchlist:hover {
+    background: #ddd;
+}
         .completed {
             background: #222;
             color: white;
@@ -417,17 +425,19 @@
 
             <!-- BUTTONS -->
 
-            <div class="buttons">
+           <div class="buttons">
+    <a href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+       class="watchlist">
+        + Add to Watchlist
+           </a>
 
-                <button class="watchlist">
-                    + Add to Watchlist
-                </button>
-
-                <button class="completed">
-                    ✓ Completed
-                </button>
-
-            </div>
+    <button class="completed">
+        ✓ Completed
+    </button>
+     <a href="{{ url_for('completed') }}" class="completed-btn">
+    ✓ Completed
+</a>
+</div>
 
         </div>
 

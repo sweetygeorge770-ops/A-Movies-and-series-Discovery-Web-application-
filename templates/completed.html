@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Completed - Cineverse</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}">Home</a>
+
+        <a href="{{ url_for('watchlist') }}">
+            Watchlist
+        </a>
+
+        <a href="{{ url_for('completed') }}" class="active">
+            Completed
+        </a>
+    </nav>
+
+
+    <!-- COMPLETED SECTION -->
+
+    <section class="watchlist-section">
+
+        <h1>Completed</h1>
+
+        {% if movies %}
+
+        <div class="watchlist-grid">
+
+            {% for movie in movies %}
+
+            <div class="watchlist-item">
+
+                <!-- POSTER -->
+
+                <img
+                    src="https://image.tmdb.org/t/p/w500{{ movie['poster_path'] }}"
+                    alt="{{ movie['title'] }}"
+                    class="watchlist-poster"
+                >
+
+
+                <!-- TITLE -->
+
+                <h2>{{ movie["title"] }}</h2>
+
+
+                <!-- VIEW DETAILS -->
+
+                <a
+                    href="{{ url_for('movie', movie_id=movie['movie_id']) }}"
+                    class="watchlist-details-btn">
+
+                    View Details
+
+                </a>
+
+
+                <!-- REMOVE -->
+
+                <a
+                    href="{{ url_for('remove_from_completed', movie_id=movie['movie_id']) }}"
+                    class="watchlist-remove-btn">
+
+                    Remove
+
+                </a>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-watchlist">
+
+            <h2>No Completed Movies Yet</h2>
+
+            <p>
+                Movies and series you complete will appear here.
+            </p>
+
+            <a href="{{ url_for('home') }}">
+                Explore Cineverse
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</body>
+</html>
