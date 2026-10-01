@@ -425,20 +425,19 @@
 
             <!-- BUTTONS -->
 
-           <div class="buttons">
+          <div class="buttons">
+
     <a href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
        class="watchlist">
         + Add to Watchlist
-           </a>
+    </a>
 
-    <button class="completed">
+    <a href="{{ url_for('add_to_completed', movie_id=movie.id) }}"
+       class="completed">
         ✓ Completed
-    </button>
-     <a href="{{ url_for('completed') }}" class="completed-btn">
-    ✓ Completed
-</a>
-</div>
+    </a>
 
+</div>
         </div>
 
     </div>

@@ -1705,3 +1705,16 @@ footer p {
     }
 
 }
+.completed {
+    background: rgb(244, 241, 241);
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.completed:hover {
+    background: #fcfbfb;
+}
