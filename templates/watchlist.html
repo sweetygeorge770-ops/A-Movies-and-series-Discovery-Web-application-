@@ -13,11 +13,13 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar">
+   <nav>
+    <div class="nav-links">
         <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('watchlist') }}" class="active">Watchlist</a>
-        <a href="#">Completed</a>
-    </nav>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('completed') }}">Completed</a>
+    </div>
+</nav>
 
 
     <!-- WATCHLIST -->

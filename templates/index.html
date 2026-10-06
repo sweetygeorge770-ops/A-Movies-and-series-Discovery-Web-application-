@@ -149,96 +149,20 @@
     <div class="carousel-wrapper">
 
         <div class="movie-container" id="trendingMovies">
-             <div class="movie-card">
-                <div class="rank">01</div>
-                <img src="{{ url_for('static', filename='images/wednesday.jpeg') }}" alt="Wednesday">
-                <h3>Wednesday</h3>
-                <p>Mystery, Comedy</p>
-                <p>Rating: 8.0 ⭐</p>
-            </div>
+            {% for movie in india_movies[:10] %}
 
-            <div class="movie-card">
-                <div class="rank">02</div>
-                <img src="{{ url_for('static', filename='images/interstellar.jpg') }}" alt="Interstellar">
-                <h3>Interstellar</h3>
-                <p>Sci-Fi, Drama</p>
-                <p>Rating: 8.7 ⭐</p>
-            </div>
+<div class="movie-card">
 
-            <div class="movie-card">
-                <div class="rank">03</div>
-                <img src="{{ url_for('static', filename='images/interstellar.jpg') }}" alt="Interstellar">
-                <h3>Interstellar</h3>
-                <p>Sci-Fi, Drama</p>
-                <p>Rating: 8.7 ⭐</p>
-            </div>
+    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+         alt="{{ movie.title }}">
 
-            <div class="movie-card">
-                <div class="rank">03</div>
-                <img src="{{ url_for('static', filename='images/inception.jpg') }}" alt="Inception">
-                <h3>Inception</h3>
-                <p>Sci-Fi, Thriller</p>
-                <p>Rating: 8.8 ⭐</p>
-            </div>
+    <h3>{{ movie.title }}</h3>
 
-            <div class="movie-card">
-                <div class="rank">04</div>
-                <img src="{{ url_for('static', filename='images/jawan.jpg') }}" alt="Jawan">
-                <h3>Jawan</h3>
-                <p>Action, Thriller</p>
-                <p>Rating: 7.0 ⭐</p>
-            </div>
+</div>
 
-            <div class="movie-card">
-                <div class="rank">05</div>
-                <img src="{{ url_for('static', filename='images/stranger.jpg') }}" alt="Stranger Things">
-                <h3>Stranger Things</h3>
-                <p>Mystery, Sci-Fi</p>
-                <p>Rating: 8.6 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">06</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Pushpa 2</h3>
-                <p>Action, Drama</p>
-                <p>Rating: 6.0 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">07</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Kalki 2898 AD</h3>
-                <p>Sci-Fi, Action</p>
-                <p>Rating: 8.0 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">08</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>RRR</h3>
-                <p>Action, Drama</p>
-                <p>Rating: 7.8 ⭐</p>
-            </div>
-             <div class="movie-card">
-                <div class="rank">09</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Titanic</h3>
-                <p>Romance, Drama</p>
-                <p>Rating: 7.9 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">10</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>The Dark Knight</h3>
-                <p>Action, Crime</p>
-                <p>Rating: 9.0 ⭐</p>
-            </div>
-
-        </div>
-
+{% endfor %}
     </div>
+</div>
 
 </section>
 <!-- ==============================
@@ -246,97 +170,28 @@
      ============================== -->
 
 <section class="movie-section">
-
     <h2>Top 10 Movies in Global</h2>
 
     <div class="carousel-wrapper">
 
         <div class="movie-container" id="globalMovies">
 
-            <div class="movie-card">
-                <div class="rank">01</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Avatar</h3>
-                <p>Sci-Fi, Adventure</p>
-                <p>Rating: 7.8 ⭐</p>
-            </div>
+            {% for movie in global_movies[:10] %}
 
             <div class="movie-card">
-                <div class="rank">02</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Titanic</h3>
-                <p>Romance, Drama</p>
-                <p>Rating: 7.9 ⭐</p>
+
+                <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                     alt="{{ movie.title }}">
+
+                <h3>{{ movie.title }}</h3>
+
             </div>
 
-            <div class="movie-card">
-                <div class="rank">03</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>The Dark Knight</h3>
-                <p>Action, Crime</p>
-                <p>Rating: 9.0 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">04</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Oppenheimer</h3>
-                <p>Drama, History</p>
-                <p>Rating: 8.6 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">05</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Avengers: Endgame</h3>
-                <p>Action, Sci-Fi</p>
-                <p>Rating: 8.4 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">06</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Parasite</h3>
-                <p>Thriller, Drama</p>
-                <p>Rating: 8.5 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">07</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Joker</h3>
-                <p>Crime, Drama</p>
-                <p>Rating: 8.3 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">08</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Dune: Part Two</h3>
-                <p>Sci-Fi, Adventure</p>
-                <p>Rating: 8.5 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">09</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>The Godfather</h3>
-                <p>Crime, Drama</p>
-                <p>Rating: 9.2 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="rank">10</div>
-                <div class="poster-placeholder">POSTER</div>
-                <h3>The Lord of the Rings</h3>
-                <p>Fantasy, Adventure</p>
-                <p>Rating: 8.9 ⭐</p>
-            </div>
+            {% endfor %}
 
         </div>
 
     </div>
-
 </section>
 
 </body>

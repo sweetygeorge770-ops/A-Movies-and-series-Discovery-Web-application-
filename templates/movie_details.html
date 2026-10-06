@@ -162,9 +162,18 @@
     background: #ddd;
 }
         .completed {
-            background: #222;
-            color: white;
-        }
+    background: white;
+    color: black;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.completed:hover {
+    background: #ddd;
+}
 
 
         /* =========================
@@ -311,20 +320,15 @@
          NAVBAR
     ========================= -->
 
-    <nav>
+   <nav>
+    <div class="logo">CINEVERSE</div>
 
-        <div class="logo">
-            CINEVERSE
-        </div>
-
-
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="#">Watchlist</a>
-            <a href="#">Completed</a>
-        </div>
-
-    </nav>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('completed') }}">Completed</a>
+    </div>
+</nav>
 
 
     <!-- =========================

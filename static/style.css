@@ -1718,3 +1718,10 @@ footer p {
 .completed:hover {
     background: #fcfbfb;
 }
+.nav-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 35px;
+    width: 100%;
+}

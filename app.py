@@ -44,15 +44,27 @@ def init_db():
 
 
 init_db()
+def get_tmdb_data(url):
+    headers = {
+        "Authorization": f"Bearer {TMDB_TOKEN}",
+        "accept": "application/json"
+    }
+
+    response = requests.get(
+        url,
+        headers=headers,
+        params={"language": "en-US"},
+        timeout=10
+    )
+
+    response.raise_for_status()
+
+    return response.json()
 
 
 # ==============================
 # HOME PAGE
 # ==============================
-
-@app.route("/")
-def home():
-    return render_template("index.html")
 
 
 # ==============================
@@ -64,7 +76,22 @@ def home():
 @app.route("/movie")
 def movie_default():
     return redirect(url_for("movie", movie_id=119051))
+@app.route("/")
+def home():
 
+    india_movies = get_tmdb_data(
+    "https://api.themoviedb.org/3/discover/movie?with_origin_country=IN&sort_by=popularity.desc"
+)
+
+    global_movies = get_tmdb_data(
+        "https://api.themoviedb.org/3/trending/movie/day"
+    )
+
+    return render_template(
+        "index.html",
+        india_movies=india_movies.get("results", []),
+        global_movies=global_movies.get("results", [])
+    )
 
 # ==============================
 # MOVIE / SERIES DETAILS
@@ -321,6 +348,11 @@ def add_to_completed(movie_id):
             movie.get("name"),
             movie.get("poster_path")
         )
+    )
+
+    conn.execute(
+        "DELETE FROM watchlist WHERE movie_id = ?",
+        (movie_id,)
     )
 
     conn.commit()
