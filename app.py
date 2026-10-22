@@ -17,30 +17,77 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def init_db():
     conn = get_db()
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS watchlist (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            movie_id INTEGER UNIQUE,
-            title TEXT,
-            poster_path TEXT
-        )
-    """)
+    try:
+        # Create the new table structures
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS watchlist_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                movie_id INTEGER NOT NULL,
+                title TEXT,
+                poster_path TEXT,
+                media_type TEXT NOT NULL DEFAULT 'tv',
+                UNIQUE(movie_id, media_type)
+            )
+        """)
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS completed (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            movie_id INTEGER UNIQUE,
-            title TEXT,
-            poster_path TEXT
-        )
-    """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS completed_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                movie_id INTEGER NOT NULL,
+                title TEXT,
+                poster_path TEXT,
+                media_type TEXT NOT NULL DEFAULT 'tv',
+                UNIQUE(movie_id, media_type)
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        # Copy existing records into the new tables
+        for table in ("watchlist", "completed"):
+            old_columns = [
+                row["name"]
+                for row in conn.execute(
+                    f"PRAGMA table_info({table})"
+                ).fetchall()
+            ]
+
+            if table == "watchlist":
+                new_table = "watchlist_new"
+            else:
+                new_table = "completed_new"
+
+            if "media_type" in old_columns:
+                conn.execute(f"""
+                    INSERT OR IGNORE INTO {new_table}
+                    (id, movie_id, title, poster_path, media_type)
+                    SELECT id, movie_id, title, poster_path, media_type
+                    FROM {table}
+                """)
+            else:
+                conn.execute(f"""
+                    INSERT OR IGNORE INTO {new_table}
+                    (id, movie_id, title, poster_path, media_type)
+                    SELECT id, movie_id, title, poster_path, 'tv'
+                    FROM {table}
+                """)
+
+        # Replace the old tables
+        conn.execute("DROP TABLE watchlist")
+        conn.execute("DROP TABLE completed")
+
+        conn.execute("ALTER TABLE watchlist_new RENAME TO watchlist")
+        conn.execute("ALTER TABLE completed_new RENAME TO completed")
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
 
 
 init_db()
@@ -78,19 +125,22 @@ def movie_default():
     return redirect(url_for("movie", movie_id=119051))
 @app.route("/")
 def home():
-
-    india_movies = get_tmdb_data(
-    "https://api.themoviedb.org/3/discover/movie?with_origin_country=IN&sort_by=popularity.desc"
+    trending = get_tmdb_data(
+    "https://api.themoviedb.org/3/trending/all/day"
 )
 
-    global_movies = get_tmdb_data(
-        "https://api.themoviedb.org/3/trending/movie/day"
+    india_movies = get_tmdb_data(
+        "https://api.themoviedb.org/3/discover/movie?with_origin_country=IN&sort_by=popularity.desc"
     )
 
+    global_movies = get_tmdb_data(
+        "https://api.themoviedb.org/3/movie/popular"
+    )
     return render_template(
         "index.html",
         india_movies=india_movies.get("results", []),
-        global_movies=global_movies.get("results", [])
+        global_movies=global_movies.get("results", []),
+        trending=trending.get("results", [])
     )
 
 # ==============================
@@ -99,62 +149,44 @@ def home():
 
 @app.route("/movie/<int:movie_id>")
 def movie(movie_id):
+    media_type = request.args.get("type", "tv")
+
+    if media_type not in ("movie", "tv"):
+        media_type = "tv"
 
     headers = {
         "Authorization": f"Bearer {TMDB_TOKEN}",
         "accept": "application/json"
     }
 
-    # ------------------------------
-    # Get series/movie information
-    # ------------------------------
-
-    details_url = f"https://api.themoviedb.org/3/tv/{movie_id}"
-
-    details_params = {
-        "language": "en-US"
-    }
+    details_url = f"https://api.themoviedb.org/3/{media_type}/{movie_id}"
 
     details_response = requests.get(
         details_url,
         headers=headers,
-        params=details_params,
+        params={"language": "en-US"},
         timeout=10
     )
-
+    details_response.raise_for_status()
     movie_data = details_response.json()
 
-
-    # ------------------------------
-    # Get cast information
-    # ------------------------------
-
-    credits_url = f"https://api.themoviedb.org/3/tv/{movie_id}/credits"
-
-    credits_params = {
-        "language": "en-US"
-    }
+    credits_url = f"https://api.themoviedb.org/3/{media_type}/{movie_id}/credits"
 
     credits_response = requests.get(
         credits_url,
         headers=headers,
-        params=credits_params,
+        params={"language": "en-US"},
         timeout=10
     )
-
-    credits_data = credits_response.json()
-
-    cast = credits_data.get("cast", [])
-
-
-    # ------------------------------
-    # Send everything to HTML
-    # ------------------------------
+    credits_response.raise_for_status()
+    cast = credits_response.json().get("cast", [])
 
     return render_template(
         "movie_details.html",
         movie=movie_data,
-        cast=cast
+        cast=cast,
+        movie_id=movie_id,
+        media_type=media_type
     )
 
 
@@ -241,7 +273,12 @@ def add_to_watchlist(movie_id):
         "accept": "application/json"
     }
 
-    url = f"https://api.themoviedb.org/3/tv/{movie_id}"
+    media_type = request.args.get("type", "tv")
+
+    if media_type not in ("movie", "tv"):
+        media_type = "tv"
+
+    url = f"https://api.themoviedb.org/3/{media_type}/{movie_id}"
 
     response = requests.get(
         url,
@@ -250,27 +287,41 @@ def add_to_watchlist(movie_id):
         timeout=10
     )
 
+    response.raise_for_status()
     movie = response.json()
 
     conn = get_db()
 
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO watchlist
-        (movie_id, title, poster_path)
-        VALUES (?, ?, ?)
-        """,
-        (
-            movie_id,
-            movie.get("name"),
-            movie.get("poster_path")
+    try:
+        # Remove from Completed first
+        conn.execute(
+            "DELETE FROM completed WHERE movie_id = ?",
+            (movie_id,)
         )
-    )
 
-    conn.commit()
-    conn.close()
+        # Add to Watchlist if not already present
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO watchlist
+            (movie_id, title, poster_path)
+            VALUES (?, ?, ?)
+            """,
+            (
+                movie_id,
+                movie.get("name") or movie.get("title"),
+                movie.get("poster_path")
+            )
+        )
+        conn.commit()
 
-    return redirect(url_for("movie", movie_id=movie_id))
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+    return redirect(url_for("movie", movie_id=movie_id, type=media_type))
 
 
 # ==============================
@@ -319,12 +370,17 @@ def completed():
 @app.route("/add-to-completed/<int:movie_id>")
 def add_to_completed(movie_id):
 
+    media_type = request.args.get("type", "tv")
+
+    if media_type not in ("movie", "tv"):
+        media_type = "tv"
+
     headers = {
         "Authorization": f"Bearer {TMDB_TOKEN}",
         "accept": "application/json"
     }
 
-    url = f"https://api.themoviedb.org/3/tv/{movie_id}"
+    url = f"https://api.themoviedb.org/3/{media_type}/{movie_id}"
 
     response = requests.get(
         url,
@@ -333,33 +389,42 @@ def add_to_completed(movie_id):
         timeout=10
     )
 
+    response.raise_for_status()
     movie = response.json()
 
     conn = get_db()
 
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO completed
-        (movie_id, title, poster_path)
-        VALUES (?, ?, ?)
-        """,
-        (
-            movie_id,
-            movie.get("name"),
-            movie.get("poster_path")
+    try:
+        # Remove the movie from Watchlist
+        conn.execute(
+            "DELETE FROM watchlist WHERE movie_id = ?",
+            (movie_id,)
         )
-    )
 
-    conn.execute(
-        "DELETE FROM watchlist WHERE movie_id = ?",
-        (movie_id,)
-    )
+        # Add the movie to Completed
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO completed
+            (movie_id, title, poster_path)
+            VALUES (?, ?, ?)
+            """,
+            (
+                movie_id,
+                movie.get("name") or movie.get("title"),
+                movie.get("poster_path")
+            )
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
 
     return redirect(url_for("completed"))
-
 
 # ==============================
 # REMOVE FROM COMPLETED

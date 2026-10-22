@@ -342,11 +342,7 @@
 
             {% if movie.poster_path %}
 
-                <img
-                    src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
-                    alt="{{ movie.name }}"
-                >
-
+                <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}">
             {% endif %}
 
         </div>
@@ -421,7 +417,7 @@
                 <span class="imdb-star">★</span>
 
                 <span>
-                    {{ "%.1f"|format(movie.vote_average) }}/10
+                   {{ "%.1f" | format(movie.vote_average or 0) }}/10
                 </span>
 
             </div>
@@ -431,12 +427,12 @@
 
           <div class="buttons">
 
-    <a href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+    <a href="{{ url_for('add_to_watchlist', movie_id=movie_id) }}"
        class="watchlist">
         + Add to Watchlist
     </a>
 
-    <a href="{{ url_for('add_to_completed', movie_id=movie.id) }}"
+    <a href="{{ url_for('add_to_completed', movie_id=movie_id) }}"
        class="completed">
         ✓ Completed
     </a>
@@ -547,7 +543,7 @@
                     Release Date
                 </div>
 
-                {{ movie.first_air_date }}
+               {{ movie.release_date or movie.first_air_date }}
 
             </div>
 
@@ -558,7 +554,7 @@
                     Seasons
                 </div>
 
-                {{ movie.number_of_seasons }}
+               {{ movie.number_of_seasons or "N/A" }}
 
             </div>
 
@@ -569,7 +565,7 @@
                     Episodes
                 </div>
 
-                {{ movie.number_of_episodes }}
+               {{ movie.number_of_episodes or "N/A" }}
 
             </div>
 

@@ -55,86 +55,23 @@
         <h2>Trending Movies & Series</h2>
 
         <div class="movie-container" id="movieContainer">
+           {% for movie in trending[:10] %}
 
-   <a href="/movie" class="movie-link">
+<a href="{{ url_for('movie', movie_id=movie.id) }}?type={{ movie.media_type }}"
+   class="movie-link">
 
     <div class="movie-card">
 
-        <img src="{{ url_for('static', filename='images/wednesday.jpeg') }}"
-             alt="Wednesday">
+        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+             alt="{{ movie.title or movie.name }}">
 
-        <h3>Wednesday</h3>
-
-        <p>Genre: Mystery, Comedy</p>
-
-        <p>Rating: 8.0 ⭐</p>
+        <h3>{{ movie.title or movie.name }}</h3>
 
     </div>
 
 </a>
 
-    <div class="movie-card">
-        <img src="{{ url_for('static', filename='images/interstellar.jpg') }}" alt="Interstellar">
-        <h3>Interstellar</h3>
-        <p>Genre: Sci-Fi, Drama</p>
-        <p>Rating: 8.7 ⭐</p>
-    </div>
-
-    <div class="movie-card">
-        <img src="{{ url_for('static', filename='images/inception.jpg') }}" alt="Inception">
-        <h3>Inception</h3>
-        <p>Genre: Sci-Fi, Thriller</p>
-        <p>Rating: 8.8 ⭐</p>
-    </div>
-
-    <div class="movie-card">
-        <img src="{{ url_for('static', filename='images/jawan.jpg') }}" alt="Jawan">
-        <h3>Jawan</h3>
-        <p>Genre: Action, Thriller</p>
-        <p>Rating: 7.0 ⭐</p>
-    </div>
-
-    <div class="movie-card">
-        <img src="{{ url_for('static', filename='images/stranger.jpg') }}" alt="Stranger Things">
-        <h3>Stranger Things</h3>
-        <p>Genre: Mystery, Sci-Fi</p>
-        <p>Rating: 8.6 ⭐</p>
-    </div>
-    <div class="movie-card">
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Avatar</h3>
-                <p>Sci-Fi, Adventure</p>
-                <p>Rating: 7.8 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Titanic</h3>
-                <p>Romance, Drama</p>
-                <p>Rating: 7.9 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="poster-placeholder">POSTER</div>
-                <h3>The Dark Knight</h3>
-                <p>Action, Crime</p>
-                <p>Rating: 9.0 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Oppenheimer</h3>
-                <p>Drama, History</p>
-                <p>Rating: 8.6 ⭐</p>
-            </div>
-
-            <div class="movie-card">
-                <div class="poster-placeholder">POSTER</div>
-                <h3>Avengers: Endgame</h3>
-                <p>Action, Sci-Fi</p>
-                <p>Rating: 8.4 ⭐</p>
-            </div>
-</div>
+{% endfor %}
 
         </div>
     </section>
@@ -148,18 +85,15 @@
 
     <div class="carousel-wrapper">
 
-        <div class="movie-container" id="trendingMovies">
+       <div class="movie-container" id="indiaMovies">
             {% for movie in india_movies[:10] %}
-
 <div class="movie-card">
-
-    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
-         alt="{{ movie.title }}">
-
-    <h3>{{ movie.title }}</h3>
-
+    <a href="{{ url_for('movie', movie_id=movie.id, type='movie') }}">
+        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+             alt="{{ movie.title }}">
+        <h3>{{ movie.title }}</h3>
+    </a>
 </div>
-
 {% endfor %}
     </div>
 </div>
@@ -176,18 +110,15 @@
 
         <div class="movie-container" id="globalMovies">
 
-            {% for movie in global_movies[:10] %}
-
-            <div class="movie-card">
-
-                <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
-                     alt="{{ movie.title }}">
-
-                <h3>{{ movie.title }}</h3>
-
-            </div>
-
-            {% endfor %}
+           {% for movie in global_movies[:10] %}
+<div class="movie-card">
+    <a href="{{ url_for('movie', movie_id=movie.id, type='movie') }}">
+        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+             alt="{{ movie.title }}">
+        <h3>{{ movie.title }}</h3>
+    </a>
+</div>
+{% endfor %}
 
         </div>
 
